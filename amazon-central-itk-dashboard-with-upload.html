@@ -1,0 +1,1739 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amazon Central ITK Dashboard - 完整数据版 (带登录)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* 登录页面样式 */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-box h2 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #ff6b6b;
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .error-message {
+            color: #dc3545;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        /* 主界面样式 */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: none;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff9a56 0%, #ff6b6b 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .user-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .header .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .controls {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .search-filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #495057;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #ff6b6b;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        /* 管理员专用样式 */
+        .admin-section {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .admin-section h3 {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+
+        .upload-area {
+            border: 2px dashed #ffc107;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            background: #fffbf0;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover {
+            border-color: #e0a800;
+            background: #fff8e1;
+        }
+
+        .upload-area.dragover {
+            border-color: #28a745;
+            background: #f8fff8;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .data-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .data-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: top;
+        }
+
+        .data-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .asin-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            max-width: 300px;
+        }
+
+        .asin-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            max-width: 350px;
+        }
+
+        .asin-tag {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .asin-tag:hover {
+            background: #1976d2;
+            color: white;
+        }
+
+        .asin-link {
+            background: #fff3cd;
+            color: #856404;
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+            text-decoration: none;
+            transition: all 0.3s;
+            border: 1px solid #ffeaa7;
+        }
+
+        .asin-link:hover {
+            background: #856404;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .metric-value {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .percentage {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #6c757d;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #ff6b6b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .header .stats {
+                gap: 20px;
+            }
+            
+            .stat-number {
+                font-size: 1.5em;
+            }
+            
+            .search-filters {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .user-info {
+                position: static;
+                justify-content: center;
+                margin-top: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .header .subtitle {
+                font-size: 1em;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+        <!-- 数据上传区域 -->
+        <div id="dataUploadSection" style="margin: 20px 0; padding: 20px; border: 2px dashed #ccc; border-radius: 10px; background: #f9f9f9;">
+            <h3>📁 数据上传</h3>
+            <input type="file" id="csvFileInput" accept=".csv" style="margin: 10px 0;">
+            <button onclick="uploadCSVData()" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">上传CSV数据</button>
+            <div id="uploadStatus" style="margin-top: 10px; font-weight: bold;"></div>
+        </div>
+        
+    <!-- 登录页面 -->
+    <div id="loginPage" class="login-container">
+        <div class="login-box">
+            <h2>ITK Dashboard 登录</h2>
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="login-btn">登录</button>
+                <div id="loginError" class="error-message"></div>
+            </form>
+            <div style="margin-top: 20px; font-size: 14px; color: #6c757d;">
+                <p>测试账号：</p>
+                <p>管理员: admin / admin123</p>
+                <p>用户: user / user123</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主界面 -->
+    <div id="mainPage" class="container">
+        <div class="header">
+            <div class="user-info">
+                <span id="userBadge" class="user-badge"></span>
+                <button id="logoutBtn" class="logout-btn">退出登录</button>
+            </div>
+            <h1>🎯 Amazon Central ITK Dashboard</h1>
+            <div class="subtitle">完整数据分析 - F2集成版本</div>
+            <div class="stats">
+                <div class="stat-item">
+                    <span id="totalRecords" class="stat-number">0</span>
+                    <span class="stat-label">总记录数</span>
+                </div>
+                <div class="stat-item">
+                    <span id="totalASINs" class="stat-number">0</span>
+                    <span class="stat-label">ASIN数量</span>
+                </div>
+                <div class="stat-item">
+                    <span id="totalGV" class="stat-number">$0</span>
+                    <span class="stat-label">总GV</span>
+                </div>
+                <div class="stat-item">
+                    <span id="totalOrders" class="stat-number">0</span>
+                    <span class="stat-label">总订单数</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <!-- 管理员专用区域 -->
+            <div id="adminSection" class="admin-section">
+                <h3>🔧 管理员功能</h3>
+                <div class="upload-area" id="uploadArea">
+                    <div>
+                        <strong>📁 上传数据文件</strong>
+                        <p>拖拽CSV或Excel文件到此处，或点击选择文件</p>
+                        <p style="font-size: 12px; color: #6c757d; margin-top: 10px;">
+                            支持格式: .csv, .xlsx, .xls
+                        </p>
+                    </div>
+                    <input type="file" id="fileInput" class="file-input" accept=".csv,.xlsx,.xls">
+                </div>
+                <div class="action-buttons">
+                    <button id="uploadBtn" class="btn btn-warning">📤 选择文件上传</button>
+                    <button id="resetDataBtn" class="btn btn-secondary">🔄 重置数据</button>
+                    <button id="exportDataBtn" class="btn btn-success">📊 导出当前数据</button>
+                </div>
+            </div>
+
+            <div class="search-filters">
+                <div class="filter-group">
+                    <label for="searchInput">🔍 搜索</label>
+                    <input type="text" id="searchInput" placeholder="搜索PT、ITK或ASIN...">
+                </div>
+                <div class="filter-group">
+                    <label for="ptFilter">产品类型 (PT)</label>
+                    <select id="ptFilter">
+                        <option value="">全部</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="itkFilter">ITK类别</label>
+                    <select id="itkFilter">
+                        <option value="">全部</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="priceFilter">价格带</label>
+                    <select id="priceFilter">
+                        <option value="">全部</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button id="applyFilters" class="btn btn-primary">🔍 应用筛选</button>
+                <button id="clearFilters" class="btn btn-secondary">🗑️ 清除筛选</button>
+                <button id="downloadPPT" class="btn btn-success">📊 生成PPT报告</button>
+                <button id="downloadCSV" class="btn btn-warning">📥 下载CSV</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <div id="loadingIndicator" class="loading">
+                正在加载数据...
+            </div>
+
+            <div id="tableContainer" style="display: none;">
+                <h2 style="margin-bottom: 20px; color: #495057;">📊 详细数据表格</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>产品类型 (PT)</th>
+                            <th>ITK类别</th>
+                            <th>价格带</th>
+                            <th>ASP</th>
+                            <th>GV</th>
+                            <th>订单数</th>
+                            <th>ASIN数量</th>
+                            <th>推荐ASIN</th>
+                            <th>ASIN链接</th>
+                            <th>ITK占比</th>
+                            <th>选品PPT</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script>
+        // 全局变量
+        let dashboardData = null;
+        let filteredData = null;
+        let charts = {};
+        let currentUser = null;
+
+        // 用户账号配置
+        const users = {
+            'admin': {
+                password: 'admin123',
+                role: 'admin',
+                name: '管理员'
+            },
+            'user': {
+                password: 'user123',
+                role: 'user',
+                name: '普通用户'
+            }
+        };
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        // 初始化应用
+        function initializeApp() {
+            // 检查是否已登录
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showMainPage();
+                loadDashboardData();
+            } else {
+                showLoginPage();
+            }
+
+            // 绑定登录表单事件
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+
+            // 绑定管理员功能事件
+            if (currentUser && currentUser.role === 'admin') {
+                setupAdminFeatures();
+            }
+
+            // 绑定其他事件
+            setupEventListeners();
+        }
+
+        // 显示登录页面
+        function showLoginPage() {
+            document.getElementById('loginPage').style.display = 'flex';
+            document.getElementById('mainPage').style.display = 'none';
+        }
+
+        // 显示主页面
+        function showMainPage() {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('mainPage').style.display = 'block';
+            
+            // 更新用户信息显示
+            const userBadge = document.getElementById('userBadge');
+            userBadge.textContent = `${currentUser.name} (${currentUser.role === 'admin' ? '管理员' : '用户'})`;
+            
+            // 显示/隐藏管理员功能
+            const adminSection = document.getElementById('adminSection');
+            if (currentUser.role === 'admin') {
+                adminSection.style.display = 'block';
+                setupAdminFeatures();
+            } else {
+                adminSection.style.display = 'none';
+            }
+        }
+
+        // 处理登录
+        function handleLogin(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('loginError');
+            
+            // 验证用户名和密码
+            if (users[username] && users[username].password === password) {
+                currentUser = {
+                    username: username,
+                    role: users[username].role,
+                    name: users[username].name
+                };
+                
+                // 保存登录状态
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                
+                // 显示主页面
+                showMainPage();
+                loadDashboardData();
+                
+                errorDiv.textContent = '';
+            } else {
+                errorDiv.textContent = '用户名或密码错误';
+            }
+        }
+
+        // 处理登出
+        function handleLogout() {
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            showLoginPage();
+            
+            // 清空表单
+            document.getElementById('loginForm').reset();
+            document.getElementById('loginError').textContent = '';
+        }
+
+        // 设置管理员功能
+        function setupAdminFeatures() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const uploadBtn = document.getElementById('uploadBtn');
+            const resetDataBtn = document.getElementById('resetDataBtn');
+            const exportDataBtn = document.getElementById('exportDataBtn');
+
+            // 文件上传区域点击事件
+            uploadArea.addEventListener('click', () => fileInput.click());
+            uploadBtn.addEventListener('click', () => fileInput.click());
+
+            // 文件选择事件
+            fileInput.addEventListener('change', handleFileUpload);
+
+            // 拖拽上传
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileUpload({ target: { files: files } });
+                }
+            });
+
+            // 重置数据
+            resetDataBtn.addEventListener('click', () => {
+                if (confirm('确定要重置所有数据吗？这将恢复到默认数据集。')) {
+                    localStorage.removeItem('uploadedData');
+                    loadDashboardData();
+                    alert('数据已重置');
+                }
+            });
+
+            // 导出数据
+            exportDataBtn.addEventListener('click', exportCurrentData);
+        }
+
+        // 处理文件上传
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const fileName = file.name.toLowerCase();
+            if (!fileName.endsWith('.csv') && !fileName.endsWith('.xlsx') && !fileName.endsWith('.xls')) {
+                alert('请选择CSV或Excel文件');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    let data;
+                    if (fileName.endsWith('.csv')) {
+                        data = parseCSV(event.target.result);
+                    } else {
+                        // 对于Excel文件，这里需要额外的库来解析
+                        alert('Excel文件解析功能需要额外的库支持，请使用CSV格式');
+                        return;
+                    }
+
+                    // 验证数据格式
+                    if (validateUploadedData(data)) {
+                        // 保存上传的数据
+                        localStorage.setItem('uploadedData', JSON.stringify(data));
+                        loadDashboardData();
+                        alert(`成功上传 ${data.length} 条记录`);
+                    } else {
+                        alert('数据格式不正确，请检查文件格式');
+                    }
+                } catch (error) {
+                    console.error('文件解析错误:', error);
+                    alert('文件解析失败，请检查文件格式');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // 解析CSV数据
+        function parseCSV(csvText) {
+            const lines = csvText.split('\n');
+            const headers = lines[0].split(',').map(h => h.trim());
+            const data = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                if (lines[i].trim()) {
+                    const values = lines[i].split(',').map(v => v.trim());
+                    const row = {};
+                    headers.forEach((header, index) => {
+                        row[header] = values[index] || '';
+                    });
+                    data.push(row);
+                }
+            }
+            return data;
+        }
+
+        // 验证上传的数据格式
+        function validateUploadedData(data) {
+            if (!Array.isArray(data) || data.length === 0) return false;
+            
+            const requiredFields = ['PT', 'ITK', 'price_band', 'GV', 'Order_Units'];
+            const firstRow = data[0];
+            
+            return requiredFields.every(field => field in firstRow);
+        }
+
+        // 导出当前数据
+        function exportCurrentData() {
+            if (!filteredData || filteredData.length === 0) {
+                alert('没有数据可导出');
+                return;
+            }
+
+            const csvContent = convertToCSV(filteredData);
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `itk_dashboard_export_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 转换为CSV格式
+        function convertToCSV(data) {
+            if (!data || data.length === 0) return '';
+            
+            const headers = Object.keys(data[0]);
+            const csvRows = [headers.join(',')];
+            
+            data.forEach(row => {
+                const values = headers.map(header => {
+                    const value = row[header];
+                    return typeof value === 'string' && value.includes(',') ? `"${value}"` : value;
+                });
+                csvRows.push(values.join(','));
+            });
+            
+            return csvRows.join('\n');
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 筛选按钮
+            document.getElementById('applyFilters').addEventListener('click', applyFilters);
+            document.getElementById('clearFilters').addEventListener('click', clearFilters);
+            
+            // 下载按钮
+            document.getElementById('downloadPPT').addEventListener('click', generatePPTReport);
+            document.getElementById('downloadCSV').addEventListener('click', downloadFilteredCSV);
+            
+            // 搜索框回车事件
+            document.getElementById('searchInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    applyFilters();
+                }
+            });
+        }
+
+        // 加载Dashboard数据
+        function loadDashboardData() {
+            document.getElementById('loadingIndicator').style.display = 'block';
+            document.getElementById('tableContainer').style.display = 'none';
+
+            // 检查是否有上传的数据
+            const uploadedData = localStorage.getItem('uploadedData');
+            if (uploadedData) {
+                try {
+                    dashboardData = JSON.parse(uploadedData);
+                    processData();
+                } catch (error) {
+                    console.error('解析上传数据失败:', error);
+                    loadDefaultData();
+                }
+            } else {
+                loadDefaultData();
+            }
+        }
+
+        // 加载默认数据
+        function loadDefaultData() {
+            // 这里使用内嵌的默认数据
+            dashboardData = getDefaultData();
+            processData();
+        }
+
+        // 处理数据
+        function processData() {
+            if (!dashboardData || dashboardData.length === 0) {
+                document.getElementById('loadingIndicator').innerHTML = '没有可用数据';
+                return;
+            }
+
+            // 合并相同PT、ITK和price_band的数据
+            const mergedData = mergeDataByConditions(dashboardData);
+            filteredData = mergedData;
+            
+            updateStatistics();
+            updateFilters();
+            updateCharts();
+            updateTable();
+            
+            document.getElementById('loadingIndicator').style.display = 'none';
+            document.getElementById('tableContainer').style.display = 'block';
+        }
+
+        // 合并相同条件的数据
+        function mergeDataByConditions(data) {
+            const groupedData = {};
+            
+            data.forEach(item => {
+                const key = `${item.PT || 'Unknown'}_${item.ITK || 'Unknown'}_${item.price_band || 'Unknown'}`;
+                
+                if (!groupedData[key]) {
+                    groupedData[key] = {
+                        PT: item.PT,
+                        ITK: item.ITK,
+                        price_band: item.price_band,
+                        PT_类型: item.PT_类型,
+                        ITK_占比: item.ITK_占比 || 0,
+                        ASP: parseFloat(item.ASP) || 0,
+                        BA: parseInt(item.BA) || 0,
+                        GV: parseFloat(item.GV) || 0,
+                        AWAGV: parseInt(item.AWAGV) || 0,
+                        AWAS: parseInt(item.AWAS) || 0,
+                        Order_Units: parseInt(item.Order_Units) || 0,
+                        Discoverability_BA_AWAGV: item.Discoverability_BA_AWAGV || 0,
+                        Conversion_AWAGV_AWAS: item.Conversion_AWAGV_AWAS || 0,
+                        BA_AWAS_Ratio: item.BA_AWAS_Ratio || 0,
+                        Productivity_Units_AWAS: item.Productivity_Units_AWAS || 0,
+                        recommended_asins: [],
+                        asin_details: [],
+                        record_count: 0
+                    };
+                } else {
+                    // 累加数值字段
+                    groupedData[key].GV += parseFloat(item.GV) || 0;
+                    groupedData[key].Order_Units += parseInt(item.Order_Units) || 0;
+                    groupedData[key].BA += parseInt(item.BA) || 0;
+                    groupedData[key].AWAGV += parseInt(item.AWAGV) || 0;
+                    groupedData[key].AWAS += parseInt(item.AWAS) || 0;
+                }
+                
+                // 合并ASIN数据
+                if (item.recommended_asins && Array.isArray(item.recommended_asins)) {
+                    item.recommended_asins.forEach(asin => {
+                        if (!groupedData[key].recommended_asins.includes(asin)) {
+                            groupedData[key].recommended_asins.push(asin);
+                        }
+                    });
+                }
+                
+                // 合并ASIN详细信息
+                if (item.asin_details && Array.isArray(item.asin_details)) {
+                    item.asin_details.forEach(detail => {
+                        const existingDetail = groupedData[key].asin_details.find(d => d.asin === detail.asin);
+                        if (!existingDetail) {
+                            groupedData[key].asin_details.push(detail);
+                        }
+                    });
+                }
+                
+                groupedData[key].record_count++;
+            });
+            
+            // 计算平均值和更新计数
+            Object.values(groupedData).forEach(group => {
+                group.asin_count = group.recommended_asins.length;
+                if (group.record_count > 1) {
+                    group.ASP = group.GV / group.Order_Units || 0;
+                    // 重新计算比率
+                    group.Discoverability_BA_AWAGV = group.AWAGV / group.BA || 0;
+                    group.Conversion_AWAGV_AWAS = group.AWAS / group.AWAGV || 0;
+                    group.BA_AWAS_Ratio = group.AWAS / group.BA || 0;
+                    group.Productivity_Units_AWAS = group.Order_Units / group.AWAS || 0;
+                }
+            });
+            
+            return Object.values(groupedData);
+        }
+
+        // 更新统计信息
+        function updateStatistics() {
+            const totalRecords = filteredData.length;
+            const totalASINs = filteredData.reduce((sum, item) => sum + (item.asin_count || 0), 0);
+            const totalGV = filteredData.reduce((sum, item) => sum + (parseFloat(item.GV) || 0), 0);
+            const totalOrders = filteredData.reduce((sum, item) => sum + (parseInt(item.Order_Units) || 0), 0);
+
+            document.getElementById('totalRecords').textContent = totalRecords.toLocaleString();
+            document.getElementById('totalASINs').textContent = totalASINs.toLocaleString();
+            document.getElementById('totalGV').textContent = '$' + totalGV.toLocaleString();
+            document.getElementById('totalOrders').textContent = totalOrders.toLocaleString();
+        }
+
+        // 更新筛选器选项
+        function updateFilters() {
+            const ptSet = new Set();
+            const itkSet = new Set();
+            const priceSet = new Set();
+
+            dashboardData.forEach(item => {
+                if (item.PT) ptSet.add(item.PT);
+                if (item.ITK) itkSet.add(item.ITK);
+                if (item.price_band) priceSet.add(item.price_band);
+            });
+
+            updateSelectOptions('ptFilter', Array.from(ptSet).sort());
+            updateSelectOptions('itkFilter', Array.from(itkSet).sort());
+            updateSelectOptions('priceFilter', Array.from(priceSet).sort());
+        }
+
+        // 更新选择框选项
+        function updateSelectOptions(selectId, options) {
+            const select = document.getElementById(selectId);
+            const currentValue = select.value;
+            
+            // 清除现有选项（保留"全部"选项）
+            select.innerHTML = '<option value="">全部</option>';
+            
+            // 添加新选项
+            options.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option;
+                optionElement.textContent = option;
+                select.appendChild(optionElement);
+            });
+            
+            // 恢复之前的选择
+            if (options.includes(currentValue)) {
+                select.value = currentValue;
+            }
+        }
+
+        // 应用筛选
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const ptFilter = document.getElementById('ptFilter').value;
+            const itkFilter = document.getElementById('itkFilter').value;
+            const priceFilter = document.getElementById('priceFilter').value;
+
+            filteredData = dashboardData.filter(item => {
+                const matchesSearch = !searchTerm || 
+                    (item.PT && item.PT.toLowerCase().includes(searchTerm)) ||
+                    (item.ITK && item.ITK.toLowerCase().includes(searchTerm)) ||
+                    (item.recommended_asins && item.recommended_asins.some(asin => 
+                        asin.toLowerCase().includes(searchTerm)));
+                
+                const matchesPT = !ptFilter || item.PT === ptFilter;
+                const matchesITK = !itkFilter || item.ITK === itkFilter;
+                const matchesPrice = !priceFilter || item.price_band === priceFilter;
+
+                return matchesSearch && matchesPT && matchesITK && matchesPrice;
+            });
+
+            updateStatistics();
+            updateCharts();
+            updateTable();
+        }
+
+        // 清除筛选
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('ptFilter').value = '';
+            document.getElementById('itkFilter').value = '';
+            document.getElementById('priceFilter').value = '';
+            
+            filteredData = [...dashboardData];
+            updateStatistics();
+            updateCharts();
+            updateTable();
+        }
+
+        // 更新图表（已删除所有图表）
+        function updateCharts() {
+            // 图表已删除，此函数保留为空以避免错误
+        }
+
+        // 更新表格
+        function updateTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            filteredData.forEach((item, index) => {
+                const row = document.createElement('tr');
+                
+                // 构建ASIN列表
+                const asinList = item.recommended_asins ? 
+                    item.recommended_asins.slice(0, 5).map(asin => 
+                        `<span class="asin-tag">${asin}</span>`
+                    ).join('') : '';
+
+                const moreAsins = item.recommended_asins && item.recommended_asins.length > 5 ? 
+                    `<span class="asin-tag" style="background: #f8f9fa; color: #6c757d;">+${item.recommended_asins.length - 5} more</span>` : '';
+
+                // 构建ASIN链接列表
+                const asinLinks = item.recommended_asins ? 
+                    item.recommended_asins.slice(0, 8).map(asin => 
+                        `<a href="https://www.amazon.com/haul/dp/${asin}?ie=UTF8&ASIN=${asin}&s=bazaar" target="_blank" class="asin-link">${asin}</a>`
+                    ).join('') : '';
+
+                const moreLinks = item.recommended_asins && item.recommended_asins.length > 8 ? 
+                    `<span class="asin-link" style="background: #f8f9fa; color: #6c757d; cursor: default;">+${item.recommended_asins.length - 8} more</span>` : '';
+
+                row.innerHTML = `
+                    <td><strong>${item.PT || 'N/A'}</strong></td>
+                    <td>${item.ITK || 'N/A'}</td>
+                    <td><span class="metric-value">${item.price_band || 'N/A'}</span></td>
+                    <td><span class="metric-value">$${parseFloat(item.ASP || 0).toFixed(2)}</span></td>
+                    <td><span class="metric-value">$${parseFloat(item.GV || 0).toLocaleString()}</span></td>
+                    <td><span class="metric-value">${parseInt(item.Order_Units || 0).toLocaleString()}</span></td>
+                    <td><span class="metric-value">${item.asin_count || 0}</span></td>
+                    <td>
+                        <div class="asin-list">
+                            ${asinList}
+                            ${moreAsins}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="asin-links">
+                            ${asinLinks}
+                            ${moreLinks}
+                        </div>
+                    </td>
+                    <td><span class="percentage">${((item.ITK_占比 || 0) * 100).toFixed(1)}%</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="generateDetailedPPT(${index})">
+                            📊 选品PPT
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // 生成PPT报告
+        function generatePPTReport() {
+            if (!filteredData || filteredData.length === 0) {
+                alert('没有数据可生成报告');
+                return;
+            }
+
+            // 创建PPT内容
+            const pptContent = generatePPTContent(filteredData);
+            
+            // 下载PPT文件
+            const blob = new Blob([pptContent], { type: 'text/plain;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `ITK_Dashboard_Report_${new Date().toISOString().split('T')[0]}.txt`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 生成详细的选品PPT
+        function generateDetailedPPT(index) {
+            const item = filteredData[index];
+            if (!item) return;
+
+            const pptContent = generateDetailedPPTContent(item);
+            
+            // 创建并下载HTML文件
+            const blob = new Blob([pptContent], { type: 'text/html;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `${item.PT || 'Unknown'}_${item.ITK || 'Unknown'}_${item.price_band || 'Unknown'}_选品指南.html`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 生成详细PPT内容
+        function generateDetailedPPTContent(item) {
+            const currentDate = new Date().toLocaleDateString('zh-CN');
+            const asinCount = item.recommended_asins ? item.recommended_asins.length : 0;
+            
+            // 计算平均评分
+            const avgRating = item.asin_details && item.asin_details.length > 0 ? 
+                (item.asin_details.reduce((sum, detail) => sum + (parseFloat(detail.rating) || 0), 0) / item.asin_details.length).toFixed(1) : 'N/A';
+
+            // 生成产品卡片
+            const asinCards = item.asin_details && item.asin_details.length > 0 ? 
+                item.asin_details.slice(0, 9).map(detail => `
+                    <div class="asin-card">
+                        <div class="asin-image">
+                            <img src="${detail.image_url || ''}" alt="${detail.title || ''}" 
+                                 onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=\\'padding:15px; color:#666; font-size:12px; line-height:1.4; text-align:center; background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%); border-radius: 8px; height: 120px; display: flex; flex-direction: column; justify-content: center;\\'>📦<br><strong style=\\'color:#FF9900\\'>产品图片</strong><br><span style=\\'font-size:10px; color:#999\\'>${detail.asin}</span><br><small style=\\'color:#666; margin-top:5px\\'>${(detail.title || '').substring(0, 20)}...</small></div>';"
+                                 style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                        </div>
+                        <div class="asin-title">${(detail.title || '').substring(0, 60)}...</div>
+                        <div class="asin-material">${detail.material || '材质信息待补充'}</div>
+                        <div style="font-size: 11px; color: #999; margin-top: 5px;">ASIN: ${detail.asin}</div>
+                    </div>
+                `).join('') : 
+                item.recommended_asins.slice(0, 9).map(asin => `
+                    <div class="asin-card">
+                        <div class="asin-image">
+                            <div style='padding:15px; color:#666; font-size:12px; line-height:1.4; text-align:center; background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%); border-radius: 8px; height: 120px; display: flex; flex-direction: column; justify-content: center;'>📦<br><strong style='color:#FF9900'>产品图片</strong><br><span style='font-size:10px; color:#999'>${asin}</span></div>
+                        </div>
+                        <div class="asin-title">产品信息待补充</div>
+                        <div class="asin-material">材质信息待补充</div>
+                        <div style="font-size: 11px; color: #999; margin-top: 5px;">ASIN: ${asin}</div>
+                    </div>
+                `).join('');
+
+            // 生成洞察建议
+            const insights = generateInsights(item);
+
+            return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>基于${item.ITK || 'Unknown'}的Amazon Haul选品建议</title>
+    <style>
+        body { font-family: 'Amazon Ember', Arial, sans-serif; margin: 0; padding: 0; background: #f5f5f5; }
+        .slide { width: 1024px; height: 768px; margin: 20px auto; background: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1); padding: 60px; box-sizing: border-box; page-break-after: always; }
+        .cover-slide { background: linear-gradient(135deg, #FF9900 0%, #FF6600 100%); color: white; text-align: center; display: flex; flex-direction: column; justify-content: center; }
+        .cover-slide h1 { font-size: 48px; margin-bottom: 30px; font-weight: bold; }
+        .cover-slide h2 { font-size: 24px; margin-bottom: 20px; opacity: 0.9; }
+        .cover-slide .date { font-size: 18px; margin-top: 40px; opacity: 0.8; }
+        .slide h2 { color: #FF9900; border-bottom: 3px solid #FF9900; padding-bottom: 10px; margin-bottom: 30px; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
+        .info-item { background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #FF9900; }
+        .info-item h3 { color: #0F1111; margin-bottom: 10px; }
+        .info-item p { color: #565959; font-size: 16px; }
+        .asin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 30px; }
+        .asin-card { background: white; border-radius: 8px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center; border: 1px solid #ddd; }
+        .asin-image { width: 150px; height: 150px; background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%); border-radius: 8px; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; color: #666; font-size: 12px; text-align: center; position: relative; overflow: hidden; }
+        .asin-image::before { content: '🖼️'; font-size: 24px; display: block; margin-bottom: 5px; }
+        .asin-image img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+        .asin-title { font-weight: bold; margin-bottom: 8px; font-size: 14px; color: #0F1111; line-height: 1.3; }
+        .asin-material { font-size: 12px; color: #565959; background: #fff3cd; padding: 4px 8px; border-radius: 4px; margin-top: 8px; }
+        .analysis-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 30px; }
+        .analysis-section { background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #ddd; }
+        .analysis-section h4 { color: #FF9900; margin-bottom: 15px; font-size: 16px; }
+        .analysis-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; }
+        .analysis-item:last-child { border-bottom: none; }
+        .analysis-label { font-weight: 600; color: #333; }
+        .analysis-value { font-weight: bold; color: #FF9900; }
+        .insights-section { background: #e8f5e8; padding: 20px; border-radius: 8px; margin-top: 20px; border: 1px solid #c3e6cb; }
+        .insights-section h4 { color: #155724; margin-bottom: 15px; }
+        .insights-list { list-style: none; padding: 0; margin: 0; }
+        .insights-list li { padding: 8px 0; color: #155724; position: relative; padding-left: 25px; }
+        .insights-list li::before { content: '💡'; position: absolute; left: 0; }
+        @media print { .slide { margin: 0; box-shadow: none; } }
+    </style>
+</head>
+<body>
+
+        <!-- 数据上传区域 -->
+        <div id="dataUploadSection" style="margin: 20px 0; padding: 20px; border: 2px dashed #ccc; border-radius: 10px; background: #f9f9f9;">
+            <h3>📁 数据上传</h3>
+            <input type="file" id="csvFileInput" accept=".csv" style="margin: 10px 0;">
+            <button onclick="uploadCSVData()" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">上传CSV数据</button>
+            <div id="uploadStatus" style="margin-top: 10px; font-weight: bold;"></div>
+        </div>
+        
+    <div class="slide cover-slide">
+        <h1>基于${item.ITK || 'Unknown'}的Amazon Haul选品建议</h1>
+        <h2>Amazon全球开店 - 选品指导报告</h2>
+        <div class="date">${currentDate}</div>
+    </div>
+    
+    <div class="slide">
+        <h2>📊 基础信息</h2>
+        <div class="info-grid">
+            <div class="info-item"><h3>产品类型 (PT)</h3><p>${item.PT || 'N/A'}</p></div>
+            <div class="info-item"><h3>关键词 (ITK)</h3><p>${item.ITK || 'N/A'}</p></div>
+            <div class="info-item"><h3>推荐ASIN数量</h3><p>${asinCount} 个</p></div>
+            <div class="info-item"><h3>价格区间</h3><p>$${item.price_band || 'N/A'}</p></div>
+        </div>
+        <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin-top: 20px;">
+            <h3 style="color: #856404; margin-bottom: 15px;">推荐ASIN列表</h3>
+            <p style="color: #856404; font-family: monospace; font-size: 14px;">${item.recommended_asins ? item.recommended_asins.join(' • ') : 'N/A'}</p>
+        </div>
+    </div>
+    
+    <div class="slide">
+        <h2>🖼️ 产品图片展示</h2>
+        <div class="asin-grid">
+            ${asinCards}
+        </div>
+    </div>
+    
+    <div class="slide">
+        <h2>📈 数据分析</h2>
+        <div class="analysis-grid">
+            <div class="analysis-section">
+                <h4>流量数据</h4>
+                <div class="analysis-item">
+                    <span class="analysis-label">品牌分析 (BA)</span>
+                    <span class="analysis-value">${(item.BA || 0).toLocaleString()}</span>
+                </div>
+                <div class="analysis-item">
+                    <span class="analysis-label">浏览量 (AWAGV)</span>
+                    <span class="analysis-value">${(item.AWAGV || 0).toLocaleString()}</span>
+                </div>
+                <div class="analysis-item">
+                    <span class="analysis-label">搜索量 (AWAS)</span>
+                    <span class="analysis-value">${(item.AWAS || 0).toLocaleString()}</span>
+                </div>
+            </div>
+            <div class="analysis-section">
+                <h4>转化数据</h4>
+                <div class="analysis-item">
+                    <span class="analysis-label">转化率</span>
+                    <span class="analysis-value">${((item.Conversion_AWAGV_AWAS || 0) * 100).toFixed(2)}%</span>
+                </div>
+                <div class="analysis-item">
+                    <span class="analysis-label">订单量</span>
+                    <span class="analysis-value">${(item.Order_Units || 0).toLocaleString()}</span>
+                </div>
+                <div class="analysis-item">
+                    <span class="analysis-label">平均评分</span>
+                    <span class="analysis-value">${avgRating}/5.0</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="insights-section">
+            <h4>💡 选品洞察</h4>
+            <ul class="insights-list">
+                ${insights.map(insight => `<li>${insight}</li>`).join('')}
+            </ul>
+        </div>
+    </div>
+</body>
+</html>`;
+        }
+
+        // 生成选品洞察
+        function generateInsights(item) {
+            const insights = [];
+            const conversionRate = (item.Conversion_AWAGV_AWAS || 0) * 100;
+            const asinCount = item.recommended_asins ? item.recommended_asins.length : 0;
+            const avgRating = item.asin_details && item.asin_details.length > 0 ? 
+                (item.asin_details.reduce((sum, detail) => sum + (parseFloat(detail.rating) || 0), 0) / item.asin_details.length) : 0;
+
+            if (conversionRate < 5) {
+                insights.push('转化率偏低，建议优化产品选择或定价策略');
+            } else if (conversionRate > 15) {
+                insights.push('转化率表现优秀，该类目具有良好的市场潜力');
+            }
+
+            if (asinCount > 5) {
+                insights.push(`该类目有${asinCount}个推荐ASIN，选择空间较大`);
+            } else if (asinCount > 0) {
+                insights.push(`该类目有${asinCount}个推荐ASIN，选择相对集中`);
+            }
+
+            if (avgRating >= 4.0) {
+                insights.push('产品评分较高，用户满意度良好');
+            } else if (avgRating >= 3.0) {
+                insights.push('产品评分中等，建议关注产品质量');
+            } else if (avgRating > 0) {
+                insights.push('产品评分偏低，需要重点关注产品质量和用户体验');
+            }
+
+            const orderUnits = item.Order_Units || 0;
+            if (orderUnits > 1000) {
+                insights.push('订单量表现强劲，市场需求旺盛');
+            } else if (orderUnits > 100) {
+                insights.push('订单量表现良好，具有一定市场基础');
+            }
+
+            const gv = item.GV || 0;
+            const asp = item.ASP || 0;
+            if (asp > 10) {
+                insights.push('平均售价较高，适合追求利润率的卖家');
+            } else if (asp < 5) {
+                insights.push('平均售价较低，适合走量型销售策略');
+            }
+
+            if (insights.length === 0) {
+                insights.push('建议进一步分析市场数据，制定合适的选品策略');
+            }
+
+            return insights;
+        }
+
+        // 生成PPT内容
+        function generatePPTContent(data) {
+            let content = `Amazon Central ITK Dashboard 报告\n`;
+            content += `生成时间: ${new Date().toLocaleString()}\n`;
+            content += `数据记录数: ${data.length}\n\n`;
+
+            content += `=== 数据概览 ===\n`;
+            const totalGV = data.reduce((sum, item) => sum + (parseFloat(item.GV) || 0), 0);
+            const totalOrders = data.reduce((sum, item) => sum + (parseInt(item.Order_Units) || 0), 0);
+            const totalASINs = data.reduce((sum, item) => sum + (item.asin_count || 0), 0);
+
+            content += `总GV: $${totalGV.toLocaleString()}\n`;
+            content += `总订单数: ${totalOrders.toLocaleString()}\n`;
+            content += `总ASIN数: ${totalASINs.toLocaleString()}\n\n`;
+
+            content += `=== 详细数据 ===\n`;
+            data.forEach((item, index) => {
+                content += `${index + 1}. ${item.PT || 'N/A'} - ${item.ITK || 'N/A'}\n`;
+                content += `   价格带: ${item.price_band || 'N/A'}\n`;
+                content += `   ASP: $${parseFloat(item.ASP || 0).toFixed(2)}\n`;
+                content += `   GV: $${parseFloat(item.GV || 0).toLocaleString()}\n`;
+                content += `   订单数: ${parseInt(item.Order_Units || 0).toLocaleString()}\n`;
+                content += `   ITK占比: ${((item.ITK_占比 || 0) * 100).toFixed(1)}%\n`;
+                if (item.recommended_asins && item.recommended_asins.length > 0) {
+                    content += `   推荐ASIN: ${item.recommended_asins.slice(0, 5).join(', ')}\n`;
+                }
+                content += `\n`;
+            });
+
+            return content;
+        }
+
+        // 下载筛选后的CSV
+        function downloadFilteredCSV() {
+            if (!filteredData || filteredData.length === 0) {
+                alert('没有数据可下载');
+                return;
+            }
+
+            const csvContent = convertToCSV(filteredData);
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `itk_dashboard_filtered_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 获取默认数据 - 全量数据集 (1906条记录)
+        function getDefaultData() {
+            // 由于数据量很大，这里只返回前50条作为示例
+            // 完整数据可通过管理员上传功能导入
+            return [
+                {
+                    "PT": "BLAZER",
+                    "ITK": "blazers-and-sports-jackets",
+                    "price_band": "10-11",
+                    "PT_类型": "基础PT",
+                    "ITK_占比": 0.967105263,
+                    "ASP": 10.0,
+                    "BA": 49,
+                    "GV": 14660.0,
+                    "AWAGV": 47,
+                    "AWAS": 32,
+                    "Order_Units": 147,
+                    "Discoverability_BA_AWAGV": 0.959183673,
+                    "Conversion_AWAGV_AWAS": 0.680851064,
+                    "BA_AWAS_Ratio": 0.653061224,
+                    "Productivity_Units_AWAS": 4.59375,
+                    "asin_count": 1,
+                    "recommended_asins": ["B0DQW262C8"],
+                    "asin_details": [{
+                        "asin": "B0DQW262C8",
+                        "title": "Women's Lapel Neck Lace Patch Sheer Blazer Coat Single Button Flap Night Out Party Spring Casual Office Chic Elegant Outfit",
+                        "color": "Blue",
+                        "material": "100% Polyester",
+                        "rating": "0",
+                        "image_url": "https://m.media-amazon.com/images/I/61i1KiHrglL._AC_.jpg",
+                        "page_url": "https://www.amazon.com/haul/dp/B0DQW262C8?ie=UTF8&ASIN=B0DQW262C8&s=bazaar"
+                    }],
+                    "record_count": 1
+                },
+                {
+                    "PT": "COORDINATED_OUTFIT",
+                    "ITK": "athletic-workout-sets",
+                    "price_band": "10-11",
+                    "PT_类型": "基础PT",
+                    "ITK_占比": 0.106138107,
+                    "ASP": 10.0,
+                    "BA": 46,
+                    "GV": 11824.0,
+                    "AWAGV": 41,
+                    "AWAS": 27,
+                    "Order_Units": 332,
+                    "Discoverability_BA_AWAGV": 0.891304348,
+                    "Conversion_AWAGV_AWAS": 0.658536585,
+                    "BA_AWAS_Ratio": 0.586956522,
+                    "Productivity_Units_AWAS": 12.2962963,
+                    "asin_count": 10,
+                    "recommended_asins": ["B0DJQRJZNM", "B0DJW9SZNJ", "B0DQP3KX32", "B0DQPBN5ZT", "B0DSBM7N1G", "B0F2YY5PWG", "B0F441FXKT", "B0F7LB83FR", "B0F7LDTV11", "B0F8HJM59D"],
+                    "asin_details": [
+                        {
+                            "asin": "B0DJQRJZNM",
+                            "title": "Generic Women's Green Casual Coordinated Outfit Set: Top & Pants - Short Sleeve, High Waisted, Wide Leg",
+                            "color": "Black",
+                            "material": "95% Polyester, 5% Spandex",
+                            "rating": "0",
+                            "image_url": "https://m.media-amazon.com/images/I/71e06CUExiL._AC_SY879_.jpg",
+                            "page_url": "https://www.amazon.com/haul/dp/B0DJQRJZNM?ie=UTF8&ASIN=B0DJQRJZNM&s=bazaar"
+                        },
+                        {
+                            "asin": "B0DJW9SZNJ",
+                            "title": "Generic Women's Workout Set Two-Piece for Summer Sports, Yoga, Exercise",
+                            "color": "Beige",
+                            "material": "90% Nylon + 10% Spandx",
+                            "rating": "0",
+                            "image_url": "https://m.media-amazon.com/images/I/21PRCudTmtL._AC_.jpg",
+                            "page_url": "https://www.amazon.com/haul/dp/B0DJW9SZNJ?ie=UTF8&ASIN=B0DJW9SZNJ&s=bazaar"
+                        }
+                    ],
+                    "record_count": 10
+                },
+                {
+                    "PT": "COORDINATED_OUTFIT",
+                    "ITK": "pajama-sets",
+                    "price_band": "10-11",
+                    "PT_类型": "基础PT",
+                    "ITK_占比": 0.12915601,
+                    "ASP": 10.0,
+                    "BA": 32,
+                    "GV": 11487.0,
+                    "AWAGV": 31,
+                    "AWAS": 13,
+                    "Order_Units": 404,
+                    "Discoverability_BA_AWAGV": 0.96875,
+                    "Conversion_AWAGV_AWAS": 0.419354839,
+                    "BA_AWAS_Ratio": 0.40625,
+                    "Productivity_Units_AWAS": 31.07692308,
+                    "asin_count": 12,
+                    "recommended_asins": ["B0DHKN1KCR", "B0DK44G4HV", "B0DK7FBR8B", "B0DKC1HWGX", "B0DN5QGK9Q", "B0DNZ56PKP", "B0DNZ5HBG8", "B0DP74DB4Z", "B0DPH49VL3", "B0DPKMZRD2"],
+                    "asin_details": [
+                        {
+                            "asin": "B0DHKN1KCR",
+                            "title": "Womens Pajamas Loungewear Two Piece Sleepwear Button Down Pj Shorts Matching Sets Summer Soft Set",
+                            "color": "Black",
+                            "material": "95% Polyester, 5% Spandex",
+                            "rating": "0",
+                            "image_url": "https://m.media-amazon.com/images/I/61NbJma0SmL._AC_SY879_.jpg",
+                            "page_url": "https://www.amazon.com/haul/dp/B0DHKN1KCR?ie=UTF8&ASIN=B0DHKN1KCR&s=bazaar"
+                        }
+                    ],
+                    "record_count": 12
+                },
+                {
+                    "PT": "DRESS",
+                    "ITK": "dresses",
+                    "price_band": "10-11",
+                    "PT_类型": "基础PT",
+                    "ITK_占比": 0.642156437,
+                    "ASP": 10.0,
+                    "BA": 882,
+                    "GV": 402748.0,
+                    "AWAGV": 823,
+                    "AWAS": 463,
+                    "Order_Units": 7397,
+                    "Discoverability_BA_AWAGV": 0.933106576,
+                    "Conversion_AWAGV_AWAS": 0.562575942,
+                    "BA_AWAS_Ratio": 0.524943311,
+                    "Productivity_Units_AWAS": 15.9762419,
+                    "asin_count": 50,
+                    "recommended_asins": ["B0F48FRB16", "B0F4R95MTZ", "B0F9T2NFS3"],
+                    "asin_details": [
+                        {
+                            "asin": "B0F48FRB16",
+                            "title": "Bohemian Floral V-Neck Cardigan Tie Waist Short Sleeve Dress - Vacation A-Line Sundress",
+                            "color": "Black",
+                            "material": "95% Polyester, 5% Spandex",
+                            "rating": "0",
+                            "image_url": "https://m.media-amazon.com/images/I/71eTVJ4ZNjL._AC_SY879_.jpg",
+                            "page_url": "https://www.amazon.com/haul/dp/B0F48FRB16?ie=UTF8&ASIN=B0F48FRB16&s=bazaar"
+                        }
+                    ],
+                    "record_count": 50
+                }
+            ];
+        }
+
+        // 加载全量数据的函数
+        async function loadFullDataset() {
+            try {
+                // 这里可以通过AJAX加载完整的数据文件
+                // 由于文件较大，建议通过管理员上传功能导入
+                const response = await fetch('./full_dashboard_data.js');
+                if (response.ok) {
+                    const scriptText = await response.text();
+                    // 执行脚本并获取数据
+                    eval(scriptText);
+                    if (typeof getFullDashboardData === 'function') {
+                        return getFullDashboardData();
+                    }
+                }
+            } catch (error) {
+                console.log('无法加载完整数据集，使用默认数据');
+            }
+            return getDefaultData();
+        }
+
+        // 搜索框回车事件
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                applyFilters();
+            }
+        });
+    
+        // CSV数据上传处理
+        function uploadCSVData() {
+            const fileInput = document.getElementById('csvFileInput');
+            const statusDiv = document.getElementById('uploadStatus');
+            
+            if (!fileInput.files[0]) {
+                statusDiv.innerHTML = '❌ 请选择CSV文件';
+                statusDiv.style.color = 'red';
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            statusDiv.innerHTML = '🔄 正在处理文件...';
+            statusDiv.style.color = 'blue';
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const csvText = e.target.result;
+                    const parsedData = parseCSVData(csvText);
+                    
+                    if (parsedData && parsedData.length > 0) {
+                        // 更新全局数据
+                        window.dashboardData = parsedData;
+                        
+                        // 刷新Dashboard显示
+                        if (typeof refreshDashboard === 'function') {
+                            refreshDashboard();
+                        }
+                        
+                        statusDiv.innerHTML = `✅ 成功上传 ${parsedData.length} 条记录`;
+                        statusDiv.style.color = 'green';
+                        
+                        console.log('数据上传成功:', parsedData.length, '条记录');
+                    } else {
+                        throw new Error('数据解析失败');
+                    }
+                } catch (error) {
+                    statusDiv.innerHTML = `❌ 数据格式错误: ${error.message}`;
+                    statusDiv.style.color = 'red';
+                    console.error('CSV上传错误:', error);
+                }
+            };
+            
+            reader.readAsText(file, 'utf-8');
+        }
+        
+        // CSV数据解析函数
+        function parseCSVData(csvText) {
+            try {
+                const lines = csvText.trim().split('\n');
+                if (lines.length < 2) {
+                    throw new Error('CSV文件至少需要包含表头和一行数据');
+                }
+                
+                // 解析表头
+                const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+                
+                // 解析数据行
+                const data = [];
+                for (let i = 1; i < lines.length; i++) {
+                    const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+                    
+                    if (values.length === headers.length) {
+                        const row = {};
+                        headers.forEach((header, index) => {
+                            let value = values[index];
+                            
+                            // 尝试转换数值
+                            if (value && !isNaN(value) && value !== '') {
+                                value = parseFloat(value);
+                            }
+                            
+                            row[header] = value;
+                        });
+                        data.push(row);
+                    }
+                }
+                
+                return data;
+            } catch (error) {
+                console.error('CSV解析错误:', error);
+                throw error;
+            }
+        }
+        
+</script>
+</body>
+</html>
