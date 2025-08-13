@@ -1,0 +1,58 @@
+# 系统文件
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+
+# Windows 系统文件
+NTUSER.DAT*
+ntuser.dat*
+ntuser.ini
+AppData/
+Local Settings
+My Documents
+NetHood
+PrintHood
+Recent
+SendTo
+Templates
+Cookies
+Application Data
+
+# 开发文件
+*.py
+*.js
+*.json
+*.csv
+*.xlsx
+*.md
+*.sh
+*.bat
+
+# 目录
+.vscode/
+.cisco/
+Desktop/
+Documents/
+Downloads/
+Pictures/
+Videos/
+Music/
+Contacts/
+Favorites/
+Links/
+Saved Games/
+Searches/
+source/
+vscode-remote-wsl/
+deployment/
+f2_reports/
+itk_seller_reports*/
+ppt_output/
+itk-dashboard-transfer/
+Octoparse/
+
+# 保留主要的 HTML 文件
+!index.html
+!amazon-central-itk-dashboard-*.html
+!README.md
