@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amazon Central ITK Dashboard - 完整数据版 (1,906条记录)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff9a56 0%, #ff6b6b 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .controls {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .control-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .control-item label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.9em;
+        }
+
+        .control-item input, .control-item select {
+            padding: 10px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .control-item input:focus, .control-item select:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,123,255,0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40,167,69,0.3);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: white;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            border-left: 5px solid #007bff;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            font-size: 2em;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+
+        .stat-card p {
+            color: #6c757d;
+            font-weight: 600;
+        }
+
+        .table-container {
+            padding: 30px;
+            overflow-x: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .data-table th {
+            background: linear-gradient(135deg, #495057, #343a40);
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9em;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .data-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: top;
+        }
+
+        .data-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .asin-cell {
+            max-width: 200px;
+            position: relative;
+        }
+
+        .asin-preview {
+            display: block;
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .asin-preview:hover {
+            text-decoration: underline;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .modal-header h2 {
+            color: #495057;
+            margin: 0;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .asin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .asin-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .asin-item:hover {
+            border-color: #007bff;
+            transform: translateY(-2px);
+        }
+
+        .asin-link {
+            display: block;
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .asin-link:hover {
+            text-decoration: underline;
+        }
+
+        .copy-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #218838;
+        }
+
+        .upload-area {
+            border: 2px dashed #007bff;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            background: #f8f9fa;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: #0056b3;
+            background: #e3f2fd;
+        }
+
+        .upload-area.dragover {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-text {
+            color: #6c757d;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #007bff;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            font-size: 0.75em;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            border-radius: 12px;
+            text-transform: uppercase;
+        }
+
+        .asin-item img {
+            transition: transform 0.3s ease;
+        }
+
+        .asin-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .table-responsive {
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .data-table tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .data-table tbody tr:hover {
+            background-color: #e3f2fd !important;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .stat-card:nth-child(1) { border-left-color: #007bff; }
+        .stat-card:nth-child(2) { border-left-color: #28a745; }
+        .stat-card:nth-child(3) { border-left-color: #ffc107; }
+        .stat-card:nth-child(4) { border-left-color: #dc3545; }
+
+        .stat-card:nth-child(1) h3 { color: #007bff; }
+        .stat-card:nth-child(2) h3 { color: #28a745; }
+        .stat-card:nth-child(3) h3 { color: #ffc107; }
+        .stat-card:nth-child(4) h3 { color: #dc3545; }
+
+        @media (max-width: 768px) {
+            .control-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .modal-content {
+                margin: 10% auto;
+                width: 95%;
+                padding: 20px;
+            }
+
+            .asin-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Amazon Central ITK Dashboard</h1>
+            <p>完整数据版 - 1,906条记录全量导入</p>
+        </div>
+
+        <!-- 登录界面 -->
+        <div id="loginSection" class="controls" style="display: block;">
+            <div style="max-width: 400px; margin: 0 auto; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                <h2 style="text-align: center; margin-bottom: 30px; color: #495057;">🔐 系统登录</h2>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #495057;">用户名</label>
+                    <input type="text" id="username" placeholder="请输入用户名" style="width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 14px;">
+                </div>
+                <div style="margin-bottom: 30px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #495057;">密码</label>
+                    <input type="password" id="password" placeholder="请输入密码" style="width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 14px;">
+                </div>
+                <button onclick="login()" class="btn btn-primary" style="width: 100%; margin-bottom: 15px;">登录</button>
+                <div id="loginError" style="color: #dc3545; text-align: center; font-size: 14px; display: none;"></div>
+                <div style="text-align: center; color: #6c757d; font-size: 12px; margin-top: 20px;">
+                    <p>测试账号：</p>
+                    <p>管理员 - admin / admin123</p>
+                    <p>用户 - user / user123</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主界面控制区 -->
+        <div id="mainControls" class="controls" style="display: none;">
+            <div class="user-info" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                <div>
+                    <span style="font-weight: 600; color: #495057;">欢迎，</span>
+                    <span id="currentUser" style="color: #007bff; font-weight: 600;"></span>
+                    <span id="userRole" style="margin-left: 10px; padding: 4px 8px; background: #007bff; color: white; border-radius: 12px; font-size: 12px;"></span>
+                </div>
+                <button onclick="logout()" class="btn" style="background: #6c757d; color: white; padding: 8px 16px;">退出登录</button>
+            </div>
+
+            <div class="upload-area" id="uploadArea" style="display: none;">
+                <div class="upload-text">
+                    <strong>📁 拖拽CSV文件到此处或点击上传</strong><br>
+                    支持ITK数据分析文件上传
+                </div>
+                <input type="file" id="fileInput" class="file-input" accept=".csv">
+                <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                    选择文件
+                </button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <div>正在处理数据...</div>
+            </div>
+
+            <div id="alerts"></div>
+
+            <div class="control-group">
+                <div class="control-item">
+                    <label for="searchITK">🔍 搜索ITK名称</label>
+                    <input type="text" id="searchITK" placeholder="输入ITK名称进行搜索...">
+                </div>
+                <div class="control-item">
+                    <label for="filterPT">📂 筛选PT类别</label>
+                    <select id="filterPT">
+                        <option value="">全部类别</option>
+                    </select>
+                </div>
+                <div class="control-item">
+                    <label for="filterPriceBand">💰 价格带筛选</label>
+                    <select id="filterPriceBand">
+                        <option value="">全部价格带</option>
+                    </select>
+                </div>
+                <div class="control-item">
+                    <label for="minSales">📊 最小订单量</label>
+                    <input type="number" id="minSales" placeholder="最小订单量" min="0">
+                </div>
+                <div class="control-item">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-primary" onclick="applyFilters()">应用筛选</button>
+                </div>
+                <div class="control-item">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-success" onclick="exportData()">导出数据</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats" id="statsContainer" style="display: none;">
+            <div class="stat-card">
+                <h3 id="totalRecords">0</h3>
+                <p>总记录数</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="totalSales">0</h3>
+                <p>总订单量</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="totalASINs">0</h3>
+                <p>总BA(P)</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="avgPriceBand">0</h3>
+                <p>平均转化率</p>
+            </div>
+        </div>
+
+        <div class="table-container" id="tableContainer" style="display: none;">
+            <table class="data-table" id="dataTable">
+                <thead>
+                    <tr>
+                        <th>PT</th>
+                        <th>ITK</th>
+                        <th>Price_band</th>
+                        <th>BA(P)</th>
+                        <th>AWAGV(P)</th>
+                        <th>AWAS(P)</th>
+                        <th>Conversion AWAGV>AWAS(%) (P)</th>
+                        <th>Order units</th>
+                        <th>推荐ASIN</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ASIN详情模态框 -->
+    <div id="asinModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">ASIN详情</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div id="modalBody">
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script>
+        // 全局变量
+        let allData = [];
+        let filteredData = [];
+        let currentUser = null;
+        let userRole = null;
+
+        // 用户账号配置
+        const users = {
+            'admin': { password: 'admin123', role: 'admin', name: '管理员' },
+            'user': { password: 'user123', role: 'user', name: '普通用户' }
+        };
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('页面DOM加载完成');
+            try {
+                initializeApp();
+                console.log('应用初始化完成');
+            } catch (error) {
+                console.error('应用初始化失败:', error);
+                // 如果初始化失败，强制显示登录界面
+                showLoginInterface();
+            }
+        });
+
+        // 初始化应用
+        function initializeApp() {
+            console.log('开始初始化应用');
+            checkLoginStatus();
+            setupEventListeners();
+        }
+
+        // 检查登录状态
+        function checkLoginStatus() {
+            console.log('检查登录状态');
+            try {
+                const savedUser = localStorage.getItem('currentUser');
+                const savedRole = localStorage.getItem('userRole');
+                
+                console.log('本地存储中的用户:', savedUser);
+                console.log('本地存储中的角色:', savedRole);
+                console.log('用户配置:', users);
+                
+                if (savedUser && savedRole && users[savedUser]) {
+                    currentUser = savedUser;
+                    userRole = savedRole;
+                    console.log('恢复登录状态:', currentUser, userRole);
+                    
+                    try {
+                        showMainInterface();
+                        console.log('自动登录成功');
+                    } catch (e) {
+                        console.error('自动登录失败:', e);
+                        // 如果显示主界面失败，清除登录状态并显示登录界面
+                        localStorage.removeItem('currentUser');
+                        localStorage.removeItem('userRole');
+                        currentUser = null;
+                        userRole = null;
+                        showLoginInterface();
+                    }
+                } else {
+                    console.log('未找到有效登录状态，显示登录界面');
+                    showLoginInterface();
+                }
+            } catch (error) {
+                console.error('检查登录状态时出错:', error);
+                showLoginInterface();
+            }
+        }
+
+        // 显示登录界面
+        function showLoginInterface() {
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('mainControls').style.display = 'none';
+            document.getElementById('statsContainer').style.display = 'none';
+            document.getElementById('tableContainer').style.display = 'none';
+        }
+
+        // 显示主界面
+        function showMainInterface() {
+            console.log('开始显示主界面');
+            
+            try {
+                // 隐藏登录界面
+                const loginSection = document.getElementById('loginSection');
+                if (loginSection) {
+                    loginSection.style.display = 'none';
+                    console.log('登录界面已隐藏');
+                } else {
+                    console.warn('未找到登录界面元素');
+                }
+                
+                // 显示主控制区
+                const mainControls = document.getElementById('mainControls');
+                if (mainControls) {
+                    mainControls.style.display = 'block';
+                    console.log('主控制区已显示');
+                } else {
+                    console.warn('未找到主控制区元素');
+                }
+                
+                // 显示统计容器
+                const statsContainer = document.getElementById('statsContainer');
+                if (statsContainer) {
+                    statsContainer.style.display = 'grid';
+                    console.log('统计容器已显示');
+                } else {
+                    console.warn('未找到统计容器元素');
+                }
+                
+                // 显示表格容器
+                const tableContainer = document.getElementById('tableContainer');
+                if (tableContainer) {
+                    tableContainer.style.display = 'block';
+                    console.log('表格容器已显示');
+                } else {
+                    console.warn('未找到表格容器元素');
+                }
+                
+                // 更新用户信息显示
+                const currentUserElement = document.getElementById('currentUser');
+                const userRoleElement = document.getElementById('userRole');
+                
+                if (currentUser && users[currentUser]) {
+                    if (currentUserElement) {
+                        currentUserElement.textContent = users[currentUser].name;
+                        console.log('用户名已更新:', users[currentUser].name);
+                    } else {
+                        console.warn('未找到用户名显示元素');
+                    }
+                    
+                    if (userRoleElement) {
+                        userRoleElement.textContent = userRole === 'admin' ? '管理员' : '用户';
+                        console.log('用户角色已更新:', userRole);
+                    } else {
+                        console.warn('未找到用户角色显示元素');
+                    }
+                }
+                
+                // 根据权限显示/隐藏功能
+                const uploadArea = document.getElementById('uploadArea');
+                if (uploadArea) {
+                    if (userRole === 'admin') {
+                        uploadArea.style.display = 'block';
+                        console.log('管理员权限：上传区域已显示');
+                    } else {
+                        uploadArea.style.display = 'none';
+                        console.log('普通用户：上传区域已隐藏');
+                    }
+                } else {
+                    console.warn('未找到上传区域元素');
+                }
+                
+                // 加载数据和设置事件监听器
+                try {
+                    loadStoredData();
+                    loadDefaultData();
+                    setupEventListeners();
+                    console.log('数据和事件监听器加载完成');
+                } catch (e) {
+                    console.warn('数据或事件监听器加载失败:', e);
+                }
+                
+                console.log('主界面显示完成');
+                
+            } catch (error) {
+                console.error('显示主界面时出错:', error);
+                throw error; // 重新抛出错误，让调用者处理
+            }
+        }
+
+        // 登录功能
+        function login() {
+            console.log('开始登录流程');
+            
+            // 获取输入元素
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            
+            if (!usernameInput || !passwordInput) {
+                console.error('登录输入框未找到');
+                showLoginError('页面加载错误，请刷新页面重试');
+                return;
+            }
+            
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+            
+            console.log('输入的用户名:', username);
+            console.log('密码长度:', password.length);
+            
+            if (!username || !password) {
+                showLoginError('请输入用户名和密码');
+                console.log('登录失败: 用户名或密码为空');
+                return;
+            }
+            
+            console.log('用户配置:', users);
+            console.log('检查用户是否存在:', username, users[username] ? '存在' : '不存在');
+            
+            if (users[username]) {
+                console.log('密码验证:', password === users[username].password ? '通过' : '失败');
+            }
+            
+            if (users[username] && users[username].password === password) {
+                currentUser = username;
+                userRole = users[username].role;
+                
+                console.log('登录成功:', currentUser, userRole);
+                
+                // 保存登录状态
+                try {
+                    localStorage.setItem('currentUser', currentUser);
+                    localStorage.setItem('userRole', userRole);
+                    console.log('登录状态已保存到本地存储');
+                } catch (e) {
+                    console.warn('无法保存到本地存储:', e);
+                }
+                
+                // 清空输入框
+                usernameInput.value = '';
+                passwordInput.value = '';
+                
+                // 隐藏错误信息
+                const loginError = document.getElementById('loginError');
+                if (loginError) {
+                    loginError.style.display = 'none';
+                }
+                
+                // 显示主界面
+                try {
+                    showMainInterface();
+                    console.log('主界面显示成功');
+                    
+                    // 显示欢迎消息
+                    setTimeout(() => {
+                        try {
+                            showAlert(`欢迎，${users[username].name}！`, 'success');
+                        } catch (e) {
+                            console.warn('显示欢迎消息失败:', e);
+                        }
+                    }, 100);
+                    
+                } catch (e) {
+                    console.error('显示主界面失败:', e);
+                    showLoginError('界面切换失败，请刷新页面重试');
+                }
+                
+            } else {
+                console.log('登录失败: 用户名或密码错误');
+                showLoginError('用户名或密码错误');
+            }
+        }
+
+        // 显示登录错误
+        function showLoginError(message) {
+            const loginError = document.getElementById('loginError');
+            loginError.textContent = message;
+            loginError.style.display = 'block';
+        }
+
+        // 退出登录
+        function logout() {
+            currentUser = null;
+            userRole = null;
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('userRole');
+            showLoginInterface();
+            showAlert('已退出登录', 'success');
+        }
+
+        // 回车键登录
+        document.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter' && document.getElementById('loginSection').style.display !== 'none') {
+                login();
+            }
+        });
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            console.log('设置事件监听器');
+            try {
+                const fileInput = document.getElementById('fileInput');
+                const uploadArea = document.getElementById('uploadArea');
+                const searchITK = document.getElementById('searchITK');
+
+                if (!fileInput || !uploadArea || !searchITK) {
+                    console.warn('某些DOM元素未找到:', {
+                        fileInput: !!fileInput,
+                        uploadArea: !!uploadArea,
+                        searchITK: !!searchITK
+                    });
+                }
+
+                // 文件上传事件
+                if (fileInput) {
+                    fileInput.addEventListener('change', handleFileSelect);
+                }
+                
+                // 拖拽上传事件
+                if (uploadArea) {
+                    uploadArea.addEventListener('dragover', handleDragOver);
+                    uploadArea.addEventListener('dragleave', handleDragLeave);
+                    uploadArea.addEventListener('drop', handleDrop);
+                    uploadArea.addEventListener('click', () => fileInput && fileInput.click());
+                }
+
+                // 搜索事件
+                if (searchITK) {
+                    searchITK.addEventListener('input', debounce(applyFilters, 300));
+                }
+                
+                console.log('事件监听器设置完成');
+            } catch (error) {
+                console.error('设置事件监听器时出错:', error);
+            }
+        }
+
+        // 防抖函数
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // 处理文件选择
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                processFile(file);
+            }
+        }
+
+        // 处理拖拽悬停
+        function handleDragOver(event) {
+            event.preventDefault();
+            event.currentTarget.classList.add('dragover');
+        }
+
+        // 处理拖拽离开
+        function handleDragLeave(event) {
+            event.currentTarget.classList.remove('dragover');
+        }
+
+        // 处理文件拖拽
+        function handleDrop(event) {
+            event.preventDefault();
+            event.currentTarget.classList.remove('dragover');
+            
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                processFile(files[0]);
+            }
+        }
+
+        // 处理文件
+        function processFile(file) {
+            // 检查权限
+            if (userRole !== 'admin') {
+                showAlert('只有管理员可以上传文件', 'error');
+                return;
+            }
+
+            if (!file.name.toLowerCase().endsWith('.csv')) {
+                showAlert('请选择CSV格式的文件', 'error');
+                return;
+            }
+
+            showLoading(true);
+            
+            Papa.parse(file, {
+                header: true,
+                skipEmptyLines: true,
+                encoding: 'UTF-8',
+                transformHeader: function(header) {
+                    // 清理BOM和空白字符
+                    let cleaned = header.replace(/^\uFEFF/, '').trim();
+                    // 处理可能的编码问题
+                    if (cleaned.includes('M-')) {
+                        console.warn('检测到编码问题的字段名:', cleaned);
+                    }
+                    return cleaned;
+                },
+                transform: function(value, field) {
+                    // 清理数据值中的特殊字符
+                    if (typeof value === 'string') {
+                        return value.trim();
+                    }
+                    return value;
+                },
+                complete: function(results) {
+                    console.log('CSV解析完成');
+                    console.log('解析结果:', results);
+                    console.log('字段名:', results.meta.fields);
+                    
+                    if (results.errors.length > 0) {
+                        console.warn('CSV解析警告:', results.errors);
+                        showAlert('CSV解析有警告，请检查控制台', 'warning');
+                    }
+                    
+                    if (results.data.length === 0) {
+                        showAlert('CSV文件为空或格式不正确', 'error');
+                        showLoading(false);
+                        return;
+                    }
+                    
+                    // 检查是否有编码问题
+                    const hasEncodingIssues = results.meta.fields.some(field => 
+                        field.includes('M-') || field.includes('?') || field.includes('�')
+                    );
+                    
+                    if (hasEncodingIssues) {
+                        showAlert('检测到文件编码问题，建议使用UTF-8编码保存CSV文件', 'warning');
+                    }
+                    
+                    processData(results.data);
+                    showLoading(false);
+                    showAlert(`成功加载 ${results.data.length} 条记录`, 'success');
+                },
+                error: function(error) {
+                    console.error('CSV解析错误:', error);
+                    showLoading(false);
+                    showAlert('文件解析失败: ' + error.message, 'error');
+                }
+            });
+        }
+
+        // 处理数据
+        function processData(data) {
+            console.log('原始数据行数:', data.length);
+            console.log('第一行数据:', data[0]);
+            console.log('字段名列表:', Object.keys(data[0] || {}));
+            
+            // 数据清洗和格式化
+            allData = data.map((row, index) => {
+                // 处理可能的BOM问题 - 清理第一个字段名
+                const cleanedRow = {};
+                Object.keys(row).forEach(key => {
+                    const cleanKey = key.replace(/^\uFEFF/, ''); // 移除BOM
+                    cleanedRow[cleanKey] = row[key];
+                });
+                
+                const processedRow = {
+                    ASP: cleanedRow.ASP || cleanedRow['ASP'] || '',
+                    PT: cleanedRow.PT || '',
+                    ITK: cleanedRow.ITK || '',
+                    Year: cleanedRow.Year || '',
+                    'Month/Week': cleanedRow['Month/Week'] || '',
+                    'BA (P)': parseInt(cleanedRow['BA (P)']) || 0,
+                    GV: parseInt(cleanedRow.GV) || 0,
+                    'AWAGV (P)': parseInt(cleanedRow['AWAGV (P)']) || 0,
+                    '    Discoverability BA>AWAGV(%) (P)': parseFloat(cleanedRow['    Discoverability BA>AWAGV(%) (P)']) || 0,
+                    '    GV/AWAGV(#) (P)': parseFloat(cleanedRow['    GV/AWAGV(#) (P)']) || 0,
+                    'AWAS (P)': parseInt(cleanedRow['AWAS (P)']) || 0,
+                    '    Conversion AWAGV>AWAS(%) (P)': parseFloat(cleanedRow['    Conversion AWAGV>AWAS(%) (P)']) || 0,
+                    '    BA>AWAS(%) (P)': parseFloat(cleanedRow['    BA>AWAS(%) (P)']) || 0,
+                    'Order Units': parseInt(cleanedRow['Order Units']) || 0,
+                    '    Productivity Units/AWAS(#) (P)': parseFloat(cleanedRow['    Productivity Units/AWAS(#) (P)']) || 0,
+                    PT_类型: cleanedRow.PT_类型 || cleanedRow['PT_类型'] || '',
+                    price_band: cleanedRow.price_band || '',
+                    ITK_占比: parseFloat(cleanedRow.ITK_占比) || 0,
+                    对应ASIN: cleanedRow.对应ASIN || '',
+                    Title: cleanedRow.Title || '',
+                    Color: cleanedRow.Color || '',
+                    Material: cleanedRow.Material || '',
+                    Rating: parseFloat(cleanedRow.Rating) || 0,
+                    Image_URL: cleanedRow.Image_URL || '',
+                    Page_URL: cleanedRow.Page_URL || '',
+                    改进匹配ASIN: cleanedRow.改进匹配ASIN || ''
+                };
+                
+                // 调试：打印前几行的处理结果
+                if (index < 3) {
+                    console.log(`第${index + 1}行处理结果:`, processedRow);
+                }
+                
+                return processedRow;
+            });
+
+            console.log('处理后数据行数:', allData.length);
+            console.log('处理后第一行:', allData[0]);
+
+            // 保存到本地存储
+            localStorage.setItem('itkDashboardData', JSON.stringify(allData));
+            
+            // 更新界面
+            updateFilters();
+            applyFilters();
+        }
+
+        // 从本地存储加载数据
+        function loadStoredData() {
+            const storedData = localStorage.getItem('itkDashboardData');
+            if (storedData) {
+                try {
+                    allData = JSON.parse(storedData);
+                    updateFilters();
+                    applyFilters();
+                } catch (error) {
+                    console.error('加载存储数据失败:', error);
+                }
+            }
+        }
+
+        // 加载默认数据（完整数据集）
+        function loadDefaultData() {
+            if (allData.length === 0) {
+                console.log('开始加载完整数据集...');
+                
+                // 首先尝试加载完整的CSV数据
+                fetch('./表E_最终版本_拆分后 1(1).csv')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('完整CSV文件加载失败');
+                        }
+                        return response.text();
+                    })
+                    .then(csvData => {
+                        console.log('成功加载完整CSV数据');
+                        Papa.parse(csvData, {
+                            header: true,
+                            skipEmptyLines: true,
+                            encoding: 'utf-8',
+                            complete: function(results) {
+                                console.log('CSV解析完成:', results.data.length, '条记录');
+                                processData(results.data);
+                                showAlert(`成功加载完整数据集：${results.data.length} 条记录`, 'success');
+                            },
+                            error: function(error) {
+                                console.error('CSV解析错误:', error);
+                                loadFallbackData();
+                            }
+                        });
+                    })
+                    .catch(error => {
+                        console.log('完整CSV加载失败，尝试加载JSON数据:', error);
+                        
+                        // 如果CSV加载失败，尝试加载JSON文件
+                        fetch('./processed_dashboard_data.json')
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('JSON文件加载失败');
+                                }
+                                return response.json();
+                            })
+                            .then(jsonData => {
+                                console.log('成功加载JSON数据:', jsonData.length, '条记录');
+                                processJsonData(jsonData);
+                                showAlert(`成功加载合并数据集：${jsonData.length} 条记录`, 'success');
+                            })
+                            .catch(jsonError => {
+                                console.error('JSON加载也失败:', jsonError);
+                                loadFallbackData();
+                            });
+                    });
+            }
+        }
+
+        // 处理JSON数据
+        function processJsonData(jsonData) {
+            try {
+                allData = jsonData.map(item => ({
+                    'ASP': item.ASP || 0,
+                    'PT': item.PT || '',
+                    'ITK': item.ITK || '',
+                    'Year': item.Year || 2025,
+                    'Month/Week': item.Month_Week || '',
+                    'BA (P)': item.BA || 0,
+                    'GV': item.GV || 0,
+                    'AWAGV (P)': item.AWAGV || 0,
+                    '    Discoverability BA>AWAGV(%) (P)': item.Discoverability || 0,
+                    '    GV/AWAGV(#) (P)': item.GV_AWAGV_Ratio || 0,
+                    'AWAS (P)': item.AWAS || 0,
+                    '    Conversion AWAGV>AWAS(%) (P)': item.Conversion_AWAGV_AWAS || 0,
+                    '    BA>AWAS(%) (P)': item.Conversion_BA_AWAS || 0,
+                    'Order Units': item.Order_Units || item.Total_Orders || 0,
+                    '    Productivity Units/AWAS(#) (P)': item.Productivity || 0,
+                    'PT_类型': item.PT_Type || '',
+                    'price_band': item.Price_Band || '',
+                    'ITK_占比': item.ITK_Ratio || 0,
+                    'Title': item.Title || '',
+                    'Color': item.Color || '',
+                    'Material': item.Material || '',
+                    'Rating': item.Rating || 0,
+                    'Image_URL': item.Image_URL || '',
+                    'Page_URL': item.Page_URL || '',
+                    '改进匹配ASIN': item.ASIN || '',
+                    'ASIN_Count': item.ASIN_Count || 1,
+                    'ASIN_List': item.ASIN_List || []
+                }));
+                
+                console.log('JSON数据处理完成:', allData.length, '条记录');
+                filteredData = [...allData];
+                updateFilters();
+                renderTable();
+                updateStats();
+                
+            } catch (error) {
+                console.error('JSON数据处理失败:', error);
+                loadFallbackData();
+            }
+        }
+
+        // 加载备用数据
+        function loadFallbackData() {
+            console.log('加载备用示例数据...');
+            const fallbackData = \`ASP,PT,ITK,Year,Month/Week,BA (P),GV,AWAGV (P),    Discoverability BA>AWAGV(%) (P),    GV/AWAGV(#) (P),AWAS (P),    Conversion AWAGV>AWAS(%) (P),    BA>AWAS(%) (P),Order Units,    Productivity Units/AWAS(#) (P),PT_类型,price_band,ITK_占比,Title,Color,Material,Rating,Image_URL,Page_URL,改进匹配ASIN
+10,BLAZER,blazers-and-sports-jackets,2025,2025/7/31 0:00,49,14660,47,0.959183673,311.9148936,32,0.680851064,0.653061224,147,4.59375,基础PT,10-11,0.967105263, Women's Lapel Neck Lace Patch Sheer Blazer Coat Single Button Flap Night Out Party Spring Casual Office Chic Elegant Outfit ,Blue,100% Polyester,0,https://m.media-amazon.com/images/I/61i1KiHrglL._AC_.jpg,https://www.amazon.com/haul/dp/B0DQW262C8,B0DQW262C8
+10,DRESS,dresses,2025,2025/7/31 0:00,882,402748,823,0.933106576,489.3657351,463,0.562575942,0.524943311,7397,15.9762419,基础PT,10-11,0.642156437, Women Summer Dress Casual Short Sleeve Mini Dress ,Pink,95% Polyester 5% Spandex,4.2,https://m.media-amazon.com/images/I/61abc123def._AC_.jpg,https://www.amazon.com/haul/dp/B0F48FRB16,B0F48FRB16
+10,PANTS,casual-pants,2025,2025/7/31 0:00,131,78348,128,0.977099237,612.09375,86,0.671875,0.65648855,1702,19.79069767,基础PT,10-11,0.198576595, Women Casual High Waisted Palazzo Pants Wide Leg Long Lounge Trendy Trousers with Pocket ,Khaki,Cotton Blend,4.0,https://m.media-amazon.com/images/I/61yqQ8ktbKL._AC_SX522_.jpg,https://www.amazon.com/haul/dp/B0F62L1SFW,B0F62L1SFW\`;
+            
+            Papa.parse(fallbackData, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    console.log('备用数据加载完成:', results.data.length, '条记录');
+                    processData(results.data);
+                    showAlert('使用示例数据，请上传完整数据文件', 'warning');
+                }
+            });
+        }
+
+        // 显示加载状态
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            loading.style.display = show ? 'block' : 'none';
+        }
+
+        // 显示提示信息
+        function showAlert(message, type = 'success') {
+            const alertsContainer = document.getElementById('alerts');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            alertsContainer.appendChild(alertDiv);
+            
+            // 3秒后自动移除
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 3000);
+        }
+
+        // 更新筛选器选项
+        function updateFilters() {
+            const ptFilter = document.getElementById('filterPT');
+            const priceBandFilter = document.getElementById('filterPriceBand');
+            
+            // 获取唯一的PT类别
+            const ptOptions = [...new Set(allData.map(item => item.PT))].filter(pt => pt).sort();
+            ptFilter.innerHTML = '<option value="">全部类别</option>';
+            ptOptions.forEach(pt => {
+                const option = document.createElement('option');
+                option.value = pt;
+                option.textContent = pt;
+                ptFilter.appendChild(option);
+            });
+            
+            // 获取唯一的价格带
+            const priceBandOptions = [...new Set(allData.map(item => item.price_band))].filter(pb => pb).sort();
+            priceBandFilter.innerHTML = '<option value="">全部价格带</option>';
+            priceBandOptions.forEach(pb => {
+                const option = document.createElement('option');
+                option.value = pb;
+                option.textContent = pb;
+                priceBandFilter.appendChild(option);
+            });
+        }
+
+        // 应用筛选
+        function applyFilters() {
+            const searchITK = document.getElementById('searchITK').value.toLowerCase();
+            const filterPT = document.getElementById('filterPT').value;
+            const filterPriceBand = document.getElementById('filterPriceBand').value;
+            const minSales = parseInt(document.getElementById('minSales').value) || 0;
+
+            filteredData = allData.filter(item => {
+                const matchesSearch = !searchITK || (item.ITK || '').toLowerCase().includes(searchITK);
+                const matchesPT = !filterPT || item.PT === filterPT;
+                const matchesPriceBand = !filterPriceBand || item.price_band === filterPriceBand;
+                const matchesMinSales = (item['Order Units'] || 0) >= minSales;
+                
+                return matchesSearch && matchesPT && matchesPriceBand && matchesMinSales;
+            });
+
+            renderTable();
+            updateStats();
+        }
+
+        // 渲染表格
+        function renderTable() {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+
+            console.log('开始渲染表格，数据行数:', filteredData.length);
+            if (filteredData.length > 0) {
+                console.log('第一行数据示例:', filteredData[0]);
+            }
+
+            if (filteredData.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="9" style="text-align: center; padding: 40px; color: #6c757d;">暂无数据</td>';
+                tableBody.appendChild(row);
+                return;
+            }
+
+            filteredData.forEach((item, index) => {
+                const row = document.createElement('tr');
+                
+                // 调试：打印前几行的数据
+                if (index < 3) {
+                    console.log(`第${index + 1}行数据:`, {
+                        PT: item.PT,
+                        ITK: item.ITK,
+                        price_band: item.price_band,
+                        'BA (P)': item['BA (P)'],
+                        'AWAGV (P)': item['AWAGV (P)'],
+                        'AWAS (P)': item['AWAS (P)'],
+                        'Order Units': item['Order Units'],
+                        '改进匹配ASIN': item['改进匹配ASIN']
+                    });
+                }
+                
+                // 处理推荐ASIN预览
+                const recommendedAsins = item['改进匹配ASIN'] || item['对应ASIN'] || '';
+                const asinIds = recommendedAsins.split(',').map(id => id.trim()).filter(id => id);
+                const asinPreview = asinIds.length > 0 ? 
+                    `${asinIds.slice(0, 3).join(', ')}${asinIds.length > 3 ? '...' : ''}` : 
+                    '无';
+                
+                // 格式化百分比
+                const conversionRate = item['    Conversion AWAGV>AWAS(%) (P)'] || item['Conversion AWAGV>AWAS(%) (P)'] || 0;
+                const formattedConversion = (conversionRate * 100).toFixed(2) + '%';
+                
+                row.innerHTML = `
+                    <td><span class="badge">${item.PT || ''}</span></td>
+                    <td><strong>${item.ITK || ''}</strong></td>
+                    <td>${item.price_band || item.Price_band || ''}</td>
+                    <td><strong>${(item['BA (P)'] || 0).toLocaleString()}</strong></td>
+                    <td><strong>${(item['AWAGV (P)'] || 0).toLocaleString()}</strong></td>
+                    <td><strong>${(item['AWAS (P)'] || 0).toLocaleString()}</strong></td>
+                    <td>${formattedConversion}</td>
+                    <td><strong>${(item['Order Units'] || 0).toLocaleString()}</strong></td>
+                    <td class="asin-cell">
+                        ${asinIds.length > 0 ? 
+                            `<a href="#" class="asin-preview" onclick="showASINModal('${item.ITK}', ${index})">${asinPreview}</a>` :
+                            '<span style="color: #6c757d;">无ASIN</span>'
+                        }
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // 更新统计信息
+        function updateStats() {
+            const totalRecords = filteredData.length;
+            const totalOrderUnits = filteredData.reduce((sum, item) => sum + (item['Order Units'] || 0), 0);
+            const totalBA = filteredData.reduce((sum, item) => sum + (item['BA (P)'] || 0), 0);
+            const totalAWAS = filteredData.reduce((sum, item) => sum + (item['AWAS (P)'] || 0), 0);
+            
+            // 计算平均价格带
+            const priceBands = filteredData
+                .map(item => {
+                    const band = (item.price_band || '').split('-');
+                    if (band.length === 2) {
+                        return (parseInt(band[0]) + parseInt(band[1])) / 2;
+                    }
+                    return 0;
+                })
+                .filter(val => !isNaN(val) && val > 0);
+            
+            const avgPriceBand = priceBands.length > 0 ? 
+                (priceBands.reduce((sum, val) => sum + val, 0) / priceBands.length).toFixed(1) : 0;
+
+            // 计算平均转化率
+            const avgConversion = filteredData.length > 0 ? 
+                (filteredData.reduce((sum, item) => sum + (item['    Conversion AWAGV>AWAS(%) (P)'] || 0), 0) / filteredData.length * 100).toFixed(2) : 0;
+
+            document.getElementById('totalRecords').textContent = totalRecords.toLocaleString();
+            document.getElementById('totalSales').textContent = totalOrderUnits.toLocaleString();
+            document.getElementById('totalASINs').textContent = totalBA.toLocaleString();
+            document.getElementById('avgPriceBand').textContent = avgConversion + '%';
+        }
+
+        // 显示ASIN模态框
+        function showASINModal(itkName, dataIndex) {
+            const item = filteredData[dataIndex];
+            const modal = document.getElementById('asinModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            
+            modalTitle.textContent = `${itkName} - ASIN详情`;
+            
+            // 解析ASIN数据
+            const asinIds = (item.改进匹配ASIN || item.对应ASIN || '').split(',').map(id => id.trim()).filter(id => id);
+            const imageUrl = item.Image_URL || '';
+            const pageUrl = item.Page_URL || '';
+            const title = item.Title || '';
+            
+            let modalContent = `
+                <div style="margin-bottom: 20px;">
+                    <h4>基本信息</h4>
+                    <p><strong>PT类型:</strong> ${item.PT}</p>
+                    <p><strong>ITK:</strong> ${item.ITK}</p>
+                    <p><strong>价格带:</strong> ${item.price_band}</p>
+                    <p><strong>BA (P):</strong> ${(item['BA (P)'] || 0).toLocaleString()}</p>
+                    <p><strong>AWAGV (P):</strong> ${(item['AWAGV (P)'] || 0).toLocaleString()}</p>
+                    <p><strong>AWAS (P):</strong> ${(item['AWAS (P)'] || 0).toLocaleString()}</p>
+                    <p><strong>Order Units:</strong> ${(item['Order Units'] || 0).toLocaleString()}</p>
+                    <p><strong>转化率:</strong> ${((item['    Conversion AWAGV>AWAS(%) (P)'] || 0) * 100).toFixed(2)}%</p>
+                </div>
+            `;
+            
+            // 显示产品图片
+            if (imageUrl) {
+                modalContent += `
+                    <div style="margin-bottom: 20px;">
+                        <h4>产品图片</h4>
+                        <div style="text-align: center;">
+                            <img src="${imageUrl}" alt="产品图片" 
+                                 style="max-width: 300px; height: auto; border-radius: 8px; border: 2px solid #e9ecef; cursor: pointer;"
+                                 onclick="window.open('${imageUrl}', '_blank')">
+                        </div>
+                    </div>
+                `;
+            }
+            
+            modalContent += `
+                <div>
+                    <h4>ASIN列表 (${asinIds.length}个)</h4>
+                    <div class="asin-grid">
+            `;
+            
+            asinIds.forEach((asin, index) => {
+                modalContent += `
+                    <div class="asin-item">
+                        ${imageUrl ? `<img src="${imageUrl}" alt="${asin}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 4px; margin-bottom: 8px;">` : ''}
+                        <div style="font-weight: bold; margin-bottom: 5px;">${asin}</div>
+                        <div style="font-size: 12px; color: #6c757d; margin-bottom: 8px; height: 36px; overflow: hidden;">${title}</div>
+                        ${pageUrl ? `<a href="${pageUrl}" target="_blank" class="asin-link">查看商品</a>` : ''}
+                        <button class="copy-btn" onclick="copyToClipboard('${asin}')">复制ASIN</button>
+                    </div>
+                `;
+            });
+            
+            modalContent += `
+                    </div>
+                </div>
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e9ecef;">
+                    <h4>产品详情</h4>
+                    <p><strong>材质:</strong> ${item.Material || '无'}</p>
+                    <p><strong>颜色:</strong> ${item.Color || '无'}</p>
+                    <p><strong>评分:</strong> ${item.Rating || '无'}</p>
+                </div>
+            `;
+            
+            modalBody.innerHTML = modalContent;
+            modal.style.display = 'block';
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('asinModal').style.display = 'none';
+        }
+
+        // 复制到剪贴板
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showAlert(`已复制: ${text}`, 'success');
+            }).catch(() => {
+                // 备用方法
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showAlert(`已复制: ${text}`, 'success');
+            });
+        }
+
+        // 导出数据
+        function exportData() {
+            if (filteredData.length === 0) {
+                showAlert('没有数据可导出', 'error');
+                return;
+            }
+
+            // 创建导出数据，移除敏感字段
+            const exportData = filteredData.map(item => {
+                const exportItem = { ...item };
+                // 移除目标人群和匹配置信度字段
+                delete exportItem.目标人群;
+                delete exportItem.平均匹配置信度;
+                return exportItem;
+            });
+
+            const csvContent = Papa.unparse(exportData);
+            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `ITK_Dashboard_Export_${new Date().toISOString().split('T')[0]}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showAlert('数据导出成功', 'success');
+            }
+        }
+
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            const modal = document.getElementById('asinModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
